@@ -1,16 +1,52 @@
 const express = require("express");
 const app = express();
+const MongoClient = require('mongodb').MongoClient;
+
+// const url = 'mongodb://db:27017/booksapi'; // when using docker-compose for full development
+const url = 'mongodb://localhost:27017/booksapi';
+
 
 app.use(express.json());
 
 
-app.post("/book", function(req, res) {
-    const {title, authors, description, isbn} = req.body;
-    res.json({title, authors, description, isbn});
+// let books;
+// MongoClient.connect(url, function(err, client) {
+    // setTimeout(() => {
+    //     books = client.db().collection("books");
+    // }, 10000);
+
+// });
+let booksPromise = MongoClient.connect(url).then(function(client) {
+    return client.db().collection("books");
 });
 
-app.get("/world", function(req, res) {
-    res.send("world");
+app.post("/book", function(req, res) {
+    const {title, authors, isbn, description} = req.body;
+
+    booksPromise.then(function(books) {
+        return books.updateOne(
+            {isbn: isbn},
+            {$set : {title, authors, isbn, description} },
+            {upsert: true}
+        );
+    }).then(function() {
+        res.json({title, authors, isbn, description});
+    });
+
+});
+
+app.get("/book/:isbn", function (req, res) {
+    const isbn = req.params.isbn;
+    booksPromise
+        .then(function (books) {
+            return books.findOne(
+                {isbn},
+                { projection: {_id: 0} }
+            );
+        })
+        .then(function (book) {
+            res.json(book);
+        });
 });
 
 app.use(function notFound(req, res, next) {
@@ -20,6 +56,7 @@ app.use(function notFound(req, res, next) {
 });
 
 function errorHandler(err, req, res, next) {
+    console.error(err);
     res.status(err.status || 500);
     res.json({message: err.message, error: err.stack});
 }
