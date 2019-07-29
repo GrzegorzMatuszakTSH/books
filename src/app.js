@@ -8,7 +8,7 @@ const url = 'mongodb://localhost:27017/booksapi';
 
 app.use(express.json());
 
-let booksPromise = MongoClient.connect(url).then(function(client) {
+let booksPromise = MongoClient.connect(url, {bufferMaxEntries: 0,  useNewUrlParser: true }).then(function(client) {
     return client.db().collection("books");
 });
 
