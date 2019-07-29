@@ -3,12 +3,13 @@
     "start": "node src/server.js",
     "test": "npm-run-all --parallel test:*",
     "test:unit": "mocha test/unit",
-    "test:component": "mocha test/component",
+    "test:component": "mocha --exit test/component",
     "watch": "nodemon src/server.js"
   },
   "dependencies": {
     "express": "4.17.1",
-    "mongodb": "3.3.0-beta2"
+    "mongodb": "3.3.0-beta2",
+    "why-is-node-running": "2.1.0"
   },
   "devDependencies": {
     "mocha": "6.2.0",
