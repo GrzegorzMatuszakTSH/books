@@ -30,5 +30,15 @@ describe('Book inventory', function () {
             isbn: "0123456789",
             description: "The ultimate JS book!"
         });
+
+        // DELETE
+        await request
+            .delete(createResult.header.location)
+            .expect(204);
+
+        // READ - 404
+        await request
+            .get(createResult.header.location)
+            .expect(404);
     })
 });
