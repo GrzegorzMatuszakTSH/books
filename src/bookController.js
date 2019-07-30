@@ -1,3 +1,4 @@
+const responses = require("./responses");
 const mapValues = require("lodash.mapvalues");
 
 function wrapWithTryCatch(fn) {
@@ -21,26 +22,17 @@ module.exports = ({bookService, bookRepository}) => withErrorHandling({
         // JS
         await bookService.createOrUpdate(book);
         // HTTP
-        res.redirect("/book/" + book.isbn);
+        responses.createOrUpdate(req.body.isbn, res);
     },
     async details(req, res, next) {
         // HTTP
         const isbn = req.params.isbn;
+        const nolayout = req.query.nolayout;
+        const layout = nolayout == null ? "layout" : "";
         // JS
         const book = await bookRepository.findOne(isbn);
         // HTTP
-        book ? res.format({
-            "default"() {
-                res.json(book);
-            },
-            "text/html"() {
-                res.send("HTML");
-            },
-            "application/json"() {
-                res.json(book);
-            }
-
-        }) : next();
+        responses.details({book, layout}, res, next);
     },
     async delete(req, res, next) {
         // HTTP
@@ -48,6 +40,6 @@ module.exports = ({bookService, bookRepository}) => withErrorHandling({
         // JS
         await bookRepository.delete(isbn);
         // HTTP
-        res.status(204).end();
+        responses.delete(res);
     }
 });
