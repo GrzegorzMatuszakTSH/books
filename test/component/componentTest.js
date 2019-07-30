@@ -21,6 +21,7 @@ describe('Book inventory', function () {
         // READ
         const readResult = await request
             .get(createResult.header.location)
+            .set("Accept", "application/json")
             .expect(200);
 
         assert.deepStrictEqual(readResult.body, {

@@ -29,7 +29,18 @@ module.exports = ({bookService, bookRepository}) => withErrorHandling({
         // JS
         const book = await bookRepository.findOne(isbn);
         // HTTP
-        book ? res.json(book) : next();
+        book ? res.format({
+            "default"() {
+                res.json(book);
+            },
+            "text/html"() {
+                res.send("HTML");
+            },
+            "application/json"() {
+                res.json(book);
+            }
+
+        }) : next();
     },
     async delete(req, res, next) {
         // HTTP
