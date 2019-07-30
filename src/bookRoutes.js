@@ -1,6 +1,6 @@
 const router = require('express').Router();
 const bookRepository = require("./bookRepository");
-const bookService = require("./bookService");
+const bookService = require("./bookService")(bookRepository);
 const bookController = require("./bookController")({bookRepository, bookService});
 
 router.post("/book", bookController.createOrUpdate);
