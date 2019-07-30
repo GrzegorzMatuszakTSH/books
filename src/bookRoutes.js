@@ -1,5 +1,7 @@
 const router = require('express').Router();
-const bookController = require("./bookController");
+const bookRepository = require("./bookRepository");
+const bookService = require("./bookService");
+const bookController = require("./bookController")({bookRepository, bookService});
 
 router.post("/book", bookController.createOrUpdate);
 router.get("/book/:isbn", bookController.details);

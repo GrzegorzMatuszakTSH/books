@@ -1,38 +1,42 @@
-// const bookRepository = require("./bookRepository");
-// const bookService = require("./bookService");
+const mapValues = require("lodash.mapvalues");
 
-module.exports = ({bookService, bookRepository}) => ({
+function wrapWithTryCatch(fn) {
+    return async function (req, res, next) {
+        try {
+            await fn(req, res, next);
+        } catch (e) {
+            next(e);
+        }
+    };
+}
+
+function withErrorHandling(api) {
+    return mapValues(api, wrapWithTryCatch);
+}
+
+module.exports = ({bookService, bookRepository}) => withErrorHandling({
     async createOrUpdate(req, res, next) {
         // HTTP
         const book = req.body;
-        try {
-            // JS
-            await bookService.createOrUpdate(book);
-            // HTTP
-            res.redirect("/book/" + book.isbn);
-        } catch (e) {
-            next(e);
-        }
+        // JS
+        await bookService.createOrUpdate(book);
+        // HTTP
+        res.redirect("/book/" + book.isbn);
     },
     async details(req, res, next) {
+        // HTTP
         const isbn = req.params.isbn;
-        try {
-            const book = await bookRepository.findOne(isbn);
-
-            book ? res.json(book) : next();
-        } catch (e) {
-            next(e);
-        }
+        // JS
+        const book = await bookRepository.findOne(isbn);
+        // HTTP
+        book ? res.json(book) : next();
     },
     async delete(req, res, next) {
-        try {
-            const isbn = req.params.isbn;
-
-            await bookRepository.delete(isbn);
-
-            res.status(204).end();
-        } catch (e) {
-            next(e);
-        }
+        // HTTP
+        const isbn = req.params.isbn;
+        // JS
+        await bookRepository.delete(isbn);
+        // HTTP
+        res.status(204).end();
     }
 });
